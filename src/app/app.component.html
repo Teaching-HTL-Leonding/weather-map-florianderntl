@@ -1,0 +1,17 @@
+<div *ngFor="let item of records; index as i" class="card">
+  <div *ngIf="item.fields.Show" class="container">
+    <button class="right" (click)="removeFromView(i)">X</button>
+    <h1>{{item.fields.City}}</h1>
+    <img src="http://openweathermap.org/img/wn/{{item.fields.Icon}}@2x.png" alt="">
+    <h2>{{item.fields.Temperature}}</h2>
+    <h3>{{item.fields.Description}}</h3>
+  </div>
+</div>
+
+<div class="card">
+  <div class="container">
+    <h1>City:</h1>
+    <input type="text" [(ngModel)]="city" #l="ngModel">
+    <button [disabled]="!l.valid" (click)="addLocation()">Add</button>
+  </div>
+</div>

@@ -13,7 +13,10 @@ export interface Location {
 }
 
 export interface OpenWeatherMapRoot {
-  weather: OpenWeatherMapWeather[],
+  weather: {
+    description: string,
+    icon: string,
+  }[],
   main: OpenWeatherMapMain,
 }
 

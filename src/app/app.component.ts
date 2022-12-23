@@ -16,7 +16,30 @@ export class AppComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    this.weatherService.getWeathers().subscribe(data => this.records = data.records);
+    this.weatherService.getWeathers().subscribe(data => {
+      this.records = data.records;
+
+      for (let record of this.records) {
+        this.updateWeather(record);
+      }
+    });
+  }
+
+  private updateWeather(record: AirtableRecord): boolean {
+    let now = Date.now();
+    if (now - record.fields.Date > 1800000) {
+      this.weatherService.getWeather({ lat: record.fields.Latitude, lon: record.fields.Longitude }).subscribe(data => {
+        if (data.weather.length > 0) {
+          record.fields.Temperature = data.main.temp;
+          record.fields.Description = data.weather[0].description;
+          record.fields.Icon = data.weather[0].icon;
+          record.fields.Date = now;
+          this.weatherService.patchWeather(record).subscribe();
+        }
+      });
+      return true;
+    }
+    return false;
   }
 
   public addLocation(): void {
@@ -24,18 +47,7 @@ export class AppComponent implements OnInit {
 
     for (let i of this.records) {
       if (i.fields.City === this.city) {
-        let now = Date.now();
-        if (now - i.fields.Date > 1800000) {
-          this.weatherService.getWeather({ lat: i.fields.Latitude, lon: i.fields.Longitude }).subscribe(data => {
-            if (data.weather.length > 0) {
-              i.fields.Temperature = data.main.temp;
-              i.fields.Description = data.weather[0].description;
-              i.fields.Icon = data.weather[0].icon;
-              i.fields.Date = now;
-              this.weatherService.patchWeather(i).subscribe();
-            }
-          });
-        } else {
+        if (!this.updateWeather(i)) {
           i.fields.Show = true;
           this.weatherService.patchWeather(i).subscribe();
         }
